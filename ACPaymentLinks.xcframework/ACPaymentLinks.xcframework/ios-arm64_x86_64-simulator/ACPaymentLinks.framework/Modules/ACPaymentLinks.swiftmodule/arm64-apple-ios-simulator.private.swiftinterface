@@ -15,6 +15,24 @@ import _Concurrency
 import _StringProcessing
 import _SwiftConcurrencyShims
 import ObjectiveC.runtime
+@objc public protocol ACPaymentLinksDelegate : ObjectiveC.NSObjectProtocol {
+  @objc func onInitialized()
+  @objc func onInitializeFailed(error: ACPaymentLinks.ACErrorMessage)
+  @objc func onPricePointsSuccess(pricePoints: ACPaymentLinks.PricePoints)
+  @objc func onPricePointsFailed(errorMessage: ACPaymentLinks.ACErrorMessage)
+  @objc func onPurchaseSuccess(order: ACPaymentLinks.GameOrderResponse)
+  @objc func onPurchaseFailed(error: ACPaymentLinks.ACErrorMessage)
+}
+@_hasMissingDesignatedInitializers final public class InmOrientationBridge {
+  @discardableResult
+  public static func installIfNeeded() -> Swift.Bool
+  public static func beginForcePortrait(animated: Swift.Bool = false)
+  public static func endForcePortrait(andThen completion: @escaping () -> Swift.Void)
+  @objc deinit
+}
+extension Foundation.CharacterSet {
+  public static let acURLQueryAllowed: Foundation.CharacterSet
+}
 public enum ACCheckoutErrorCode : Swift.Int, Swift.Error {
   case httpRequest
   case httpBootRequest
@@ -48,6 +66,11 @@ public enum ACCheckoutErrorCode : Swift.Int, Swift.Error {
     get
   }
 }
+public class ACNetworkService<Request, Response> where Request : ACPaymentLinks.ACBaseNetworkRequest, Response : Swift.Decodable, Response : Swift.Encodable {
+  public init(request: Request)
+  public func send(completion: @escaping (Swift.Result<Response, ACPaymentLinks.ACRequestError>) -> Swift.Void)
+  @objc deinit
+}
 @objc extension ACPaymentLinks.PricePoints {
   @objc dynamic public func toJsonString() -> Swift.String
 }
@@ -78,6 +101,25 @@ public enum ACCheckoutErrorCode : Swift.Int, Swift.Error {
   public func encode(to encoder: any Swift.Encoder) throws
   required public init(from decoder: any Swift.Decoder) throws
 }
+@objc @_hasMissingDesignatedInitializers @_Concurrency.MainActor @preconcurrency final public class RotatedSafariWrapperViewController : UIKit.UIViewController, SafariServices.SFSafariViewControllerDelegate {
+  @_Concurrency.MainActor @preconcurrency @objc override final public var supportedInterfaceOrientations: UIKit.UIInterfaceOrientationMask {
+    @objc get
+  }
+  @_Concurrency.MainActor @preconcurrency @objc override final public var shouldAutorotate: Swift.Bool {
+    @objc get
+  }
+  @_Concurrency.MainActor @preconcurrency @objc override final public var prefersStatusBarHidden: Swift.Bool {
+    @objc get
+  }
+  @_Concurrency.MainActor @preconcurrency @objc override final public func viewDidLoad()
+  @_Concurrency.MainActor @preconcurrency @objc override final public func viewWillDisappear(_ animated: Swift.Bool)
+  @_Concurrency.MainActor @preconcurrency @objc override final public func viewSafeAreaInsetsDidChange()
+  @objc deinit
+}
+public struct ItemModel : Swift.Encodable {
+  public init(name: Swift.String, assetUrl: Swift.String, sku: Swift.String, quantity: Swift.Int, quantityDisplay: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+}
 public enum ACHttpMethod : Swift.String {
   case GET
   case POST
@@ -104,22 +146,6 @@ extension ACPaymentLinks.ACBaseNetworkRequest {
     get
   }
 }
-public enum NetworkError : Swift.Error {
-  case generic(ACPaymentLinks.ACRequestError)
-}
-@_hasMissingDesignatedInitializers public class ACNetworkManager {
-  @objc deinit
-}
-@objcMembers @objc public class CancelOrderResponse : ObjectiveC.NSObject, Swift.Codable {
-  @objc public var isOrderCancelled: Swift.Bool
-  @objc deinit
-  public func encode(to encoder: any Swift.Encoder) throws
-  required public init(from decoder: any Swift.Decoder) throws
-}
-public struct ItemModel : Swift.Encodable {
-  public init(name: Swift.String, assetUrl: Swift.String, sku: Swift.String, quantity: Swift.Int, quantityDisplay: Swift.String)
-  public func encode(to encoder: any Swift.Encoder) throws
-}
 public struct PriceDetailModel : Swift.Codable {
   public let price: Swift.Int
   public let currency: Swift.String
@@ -127,34 +153,20 @@ public struct PriceDetailModel : Swift.Codable {
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
 }
-@_hasMissingDesignatedInitializers final public class InmOrientationBridge {
+public enum NetworkError : Swift.Error {
+  case generic(ACPaymentLinks.ACRequestError)
+}
+public enum PortraitOrientationBridgeLock {
   @discardableResult
   public static func installIfNeeded() -> Swift.Bool
-  public static func beginForcePortrait(animated: Swift.Bool = false)
-  public static func endForcePortrait(andThen completion: @escaping () -> Swift.Void)
-  @objc deinit
+  public static func begin(animated: Swift.Bool = false)
+  public static func end(animated: Swift.Bool = true, completion: (() -> Swift.Void)? = nil)
 }
-public enum ACRequestErrorCode : Swift.Error, Swift.Equatable {
-  case noInternet
-  case invalidResponse
-  case decodingError
-  case encodingError
-  case encriptionError
-  case invalidURL
-  case noResponse
-  case unauthorized
-  case unexpectedStatusCode
-  case unknown
-  case forbiddenUrl
-  case requestError(errorCode: Swift.Int)
-  public static func == (a: ACPaymentLinks.ACRequestErrorCode, b: ACPaymentLinks.ACRequestErrorCode) -> Swift.Bool
-}
-public class ACRequestError : Swift.Error {
-  final public let errorCode: ACPaymentLinks.ACRequestErrorCode
-  final public let errorMessage: Swift.String?
-  public var rawResponse: Foundation.Data?
-  public init(errorCode: ACPaymentLinks.ACRequestErrorCode, errorMessage: Swift.String? = nil)
+@objcMembers @objc public class CancelOrderResponse : ObjectiveC.NSObject, Swift.Codable {
+  @objc public var isOrderCancelled: Swift.Bool
   @objc deinit
+  public func encode(to encoder: any Swift.Encoder) throws
+  required public init(from decoder: any Swift.Decoder) throws
 }
 @_hasMissingDesignatedInitializers @objcMembers @objc public class ACErrorMessage : ObjectiveC.NSObject, Swift.Codable {
   @objc final public let code: Swift.Int
@@ -171,6 +183,9 @@ public struct CustomerModel : Swift.Codable {
   public init(id: Swift.String, email: Swift.String)
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
+}
+@_hasMissingDesignatedInitializers public class ACNetworkManager {
+  @objc deinit
 }
 @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc(ACBridgeAPI) @objcMembers final public class ACBridgeAPI : ObjectiveC.NSObject {
   @objc weak public static var delegate: (any ACPaymentLinks.ACPaymentLinksDelegate)? {
@@ -272,31 +287,27 @@ public struct CustomerModel : Swift.Codable {
   public func encode(to encoder: any Swift.Encoder) throws
   required public init(from decoder: any Swift.Decoder) throws
 }
-@objc public protocol ACPaymentLinksDelegate : ObjectiveC.NSObjectProtocol {
-  @objc func onInitialized()
-  @objc func onInitializeFailed(error: ACPaymentLinks.ACErrorMessage)
-  @objc func onPricePointsSuccess(pricePoints: ACPaymentLinks.PricePoints)
-  @objc func onPricePointsFailed(errorMessage: ACPaymentLinks.ACErrorMessage)
-  @objc func onPurchaseSuccess(order: ACPaymentLinks.GameOrderResponse)
-  @objc func onPurchaseFailed(error: ACPaymentLinks.ACErrorMessage)
+public enum ACRequestErrorCode : Swift.Error, Swift.Equatable {
+  case noInternet
+  case invalidResponse
+  case decodingError
+  case encodingError
+  case encriptionError
+  case invalidURL
+  case noResponse
+  case unauthorized
+  case unexpectedStatusCode
+  case unknown
+  case forbiddenUrl
+  case requestError(errorCode: Swift.Int)
+  public static func == (a: ACPaymentLinks.ACRequestErrorCode, b: ACPaymentLinks.ACRequestErrorCode) -> Swift.Bool
 }
-@objc @_hasMissingDesignatedInitializers @_Concurrency.MainActor @preconcurrency final public class RotatedSafariWrapperViewController : UIKit.UIViewController, SafariServices.SFSafariViewControllerDelegate {
-  @_Concurrency.MainActor @preconcurrency @objc override final public var supportedInterfaceOrientations: UIKit.UIInterfaceOrientationMask {
-    @objc get
-  }
-  @_Concurrency.MainActor @preconcurrency @objc override final public var shouldAutorotate: Swift.Bool {
-    @objc get
-  }
-  @_Concurrency.MainActor @preconcurrency @objc override final public var prefersStatusBarHidden: Swift.Bool {
-    @objc get
-  }
-  @_Concurrency.MainActor @preconcurrency @objc override final public func viewDidLoad()
-  @_Concurrency.MainActor @preconcurrency @objc override final public func viewWillDisappear(_ animated: Swift.Bool)
-  @_Concurrency.MainActor @preconcurrency @objc override final public func viewSafeAreaInsetsDidChange()
+public class ACRequestError : Swift.Error {
+  final public let errorCode: ACPaymentLinks.ACRequestErrorCode
+  final public let errorMessage: Swift.String?
+  public var rawResponse: Foundation.Data?
+  public init(errorCode: ACPaymentLinks.ACRequestErrorCode, errorMessage: Swift.String? = nil)
   @objc deinit
-}
-extension Foundation.CharacterSet {
-  public static let acURLQueryAllowed: Foundation.CharacterSet
 }
 @objc public class ACConfigModel : ObjectiveC.NSObject, Swift.Codable {
   @objc public init(checkoutPublicKey: Swift.String, environment: Swift.String, redirectUrl: Swift.String? = nil)
@@ -320,17 +331,6 @@ public struct OfferModel : Swift.Codable {
   public init(name: Swift.String, sku: Swift.String, assetUrl: Swift.String, description: Swift.String)
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
-}
-public enum PortraitOrientationBridgeLock {
-  @discardableResult
-  public static func installIfNeeded() -> Swift.Bool
-  public static func begin(animated: Swift.Bool = false)
-  public static func end(animated: Swift.Bool = true, completion: (() -> Swift.Void)? = nil)
-}
-public class ACNetworkService<Request, Response> where Request : ACPaymentLinks.ACBaseNetworkRequest, Response : Swift.Decodable, Response : Swift.Encodable {
-  public init(request: Request)
-  public func send(completion: @escaping (Swift.Result<Response, ACPaymentLinks.ACRequestError>) -> Swift.Void)
-  @objc deinit
 }
 extension ACPaymentLinks.ACCheckoutErrorCode : Swift.Equatable {}
 extension ACPaymentLinks.ACCheckoutErrorCode : Swift.Hashable {}
