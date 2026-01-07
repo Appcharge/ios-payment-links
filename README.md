@@ -47,9 +47,9 @@ YourApp.xcworkspace
 platform :ios, '13.0'
 target 'YourApp' do
     // Import latest version
-    pod 'ACPaymentLinks'
+    pod 'ios-payment-links'
     // Or, import specific version 
-    pod 'ACPaymentLinks', '~> <version>'
+    pod 'ios-payment-links', '~> <version>'
 end
 ```
 
@@ -77,8 +77,11 @@ class ViewController: UIViewController {
 ---
 
 ## 🔄 Updating the SDK
+
+```swift
 pod repo update
-pod update ACPaymentLinks
+pod update ios-payment-links
+```
 
 ---
 

@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'ios-payment-links'
-  s.version          = "1.5.0"
+  s.version          = "1.5.1"
   s.summary          = 'Appcharge Checkout SDK'
   s.description      = <<-DESC
 A lightweight static binary SDK for Appcharge Checkout, providing
@@ -10,7 +10,6 @@ seamless integration with Appcharge payment flows.
   s.homepage         = 'https://github.com/Appcharge/ios-payment-links'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
 
-  # Multiple authors
   s.author           = { 'Appcharge' => 'paymob-release@appcharge.com' }
 
   s.platform           = :ios, '13.0'
