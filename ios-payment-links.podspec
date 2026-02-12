@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'ios-payment-links'
-  s.version          = "1.6.0"
+  s.version          = "1.6.1"
   s.summary          = 'Appcharge Checkout SDK'
   s.description      = <<-DESC
 A lightweight static binary SDK for Appcharge Checkout, providing
