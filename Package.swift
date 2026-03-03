@@ -15,8 +15,8 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "ACPaymentLinks",
-            url: "https://github.com/Appcharge/ios-payment-links/releases/download/1.6.1/ACPaymentLinks.xcframework.zip",
-            checksum: "6b7bdde04ef4f35c575691ab49eb42a773eaf731af056e5519be4cce6a058546"
+            url: "https://github.com/Appcharge/ios-payment-links/releases/download/1.7.0/ACPaymentLinks.xcframework.zip",
+            checksum: "cf70f8ad7092001a78afd059697e00f17552f0676f939e5b18faad529c003c8a"
         )
     ]
 )
