@@ -35,7 +35,7 @@ https://github.com/Appcharge/ios-payment-links
 
 #### 6. Add it to your app target.
 
-## Basic Usage Example
+## 🚀 Basic Usage Example
 
 ```swift
 import UIKit
@@ -49,7 +49,7 @@ class ViewController: UIViewController {
 }
 ```
 
-## Updating the SDK
+## 🔄 Updating the SDK
 #### To update to the latest compatible version:
 
 #### Go to:
@@ -62,12 +62,12 @@ File → Packages → Update to Latest Package Versions
 swift package update
 ```
 
-## 🚨 Troubleshooting
+## 🧯 Troubleshooting
 
 - Ensure your deployment target matches iOS 13+
 - Clean build folder: Shift + Cmd + K
 - Delete Derived Data if needed
 - Make sure you are using Xcode 15+
 
-## License
+## 📄 License
 MIT

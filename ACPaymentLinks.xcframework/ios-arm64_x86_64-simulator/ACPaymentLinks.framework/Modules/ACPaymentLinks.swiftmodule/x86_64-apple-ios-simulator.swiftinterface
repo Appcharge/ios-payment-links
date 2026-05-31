@@ -1,7 +1,7 @@
 // swift-interface-format-version: 1.0
-// swift-compiler-version: Apple Swift version 6.1.2 effective-5.10 (swiftlang-6.1.2.1.2 clang-1700.0.13.5)
-// swift-module-flags: -target x86_64-apple-ios14-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -module-name ACPaymentLinks
-// swift-module-flags-ignorable: -no-verify-emitted-module-interface -interface-compiler-version 6.1.2
+// swift-compiler-version: Apple Swift version 6.2.3 effective-5.10 (swiftlang-6.2.3.3.21 clang-1700.6.3.2)
+// swift-module-flags: -target x86_64-apple-ios13-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -module-name ACPaymentLinks
+// swift-module-flags-ignorable: -no-verify-emitted-module-interface -formal-cxx-interoperability-mode=off -interface-compiler-version 6.2.3
 @_exported import ACPaymentLinks
 import Combine
 import Foundation
@@ -15,35 +15,32 @@ import _Concurrency
 import _StringProcessing
 import _SwiftConcurrencyShims
 import ObjectiveC.runtime
-public struct ItemModel : Swift.Encodable {
-  public init(name: Swift.String, assetUrl: Swift.String, sku: Swift.String, quantity: Swift.Int, quantityDisplay: Swift.String)
-  public func encode(to encoder: any Swift.Encoder) throws
-}
 @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc(ACBridgeAPI) @objcMembers final public class ACBridgeAPI : ObjectiveC.NSObject {
-  @objc weak public static var delegate: (any ACPaymentLinks.ACPaymentLinksDelegate)? {
-    @objc get
-    @objc set
-  }
-  @nonobjc public static var isDebugModeEnabled: Swift.Bool? {
+  @nonobjc public static var setDebugMode: Swift.Bool? {
     get
     set
   }
-  @objc(isDebugModeEnabled) public static var isDebugModeEnabledObjC: Foundation.NSNumber? {
+  #if compiler(>=5.3) && $NonescapableTypes
+  @objc(setDebugMode) public static var debugModeObjC: Foundation.NSNumber? {
     @objc get
     @objc set
   }
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
   @objc @discardableResult
   public static func setBrowserMode(_ mode: ACPaymentLinks.BrowserMode) -> Swift.String?
+  #endif
   @nonobjc public static var portraitOrientationLock: Swift.Bool? {
     get
     set
   }
+  #if compiler(>=5.3) && $NonescapableTypes
   @objc(portraitOrientationLock) public static var portraitOrientationLockObjC: Foundation.NSNumber? {
     @objc get
     @objc set
   }
-  @objc public static func initialize(configModel: ACPaymentLinks.ACConfigModel, customerId: Swift.String)
-  @objc public static func initialize(configModel: ACPaymentLinks.ACConfigModel, customerId: Swift.String, platformIntegrationVersion: Swift.String? = "")
+  #endif
+  @objc public static func initialize(configModel: ACPaymentLinks.ACConfigModel, customerId: Swift.String, delegate: any ACPaymentLinks.ACPaymentLinksDelegate)
   @objc public static func getPricePoints()
   @objc public static func openCheckout(purchaseId: Swift.String, parsedUrl: Swift.String)
   @objc @available(*, deprecated, message: "This method is deprecated and will be removed in a future SDK version. Use openCheckout(purchaseId: string, parsedUrl: string) instead.")
@@ -53,12 +50,20 @@ public struct ItemModel : Swift.Encodable {
   @objc public static func openSubscriptionManager(url: Swift.String)
   @objc deinit
 }
-public struct PriceDetailModel : Swift.Codable {
-  public let price: Swift.Int
-  public let currency: Swift.String
-  public init(price: Swift.Int, currency: Swift.String)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
+@_hasMissingDesignatedInitializers final public class InmOrientationBridge {
+  @discardableResult
+  public static func installIfNeeded() -> Swift.Bool
+  public static func beginForcePortrait(animated: Swift.Bool = false)
+  public static func endForcePortrait(andThen completion: @escaping () -> Swift.Void)
+  @objc deinit
+}
+public enum PortraitOrientationBridgeLock {
+  @discardableResult
+  public static func installIfNeeded() -> Swift.Bool
+  public static func begin(animated: Swift.Bool = false)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public static func end(animated: Swift.Bool = true, completion: (() -> Swift.Void)? = nil)
+  #endif
 }
 @objc @_hasMissingDesignatedInitializers @_Concurrency.MainActor @preconcurrency final public class RotatedSafariWrapperViewController : UIKit.UIViewController, SafariServices.SFSafariViewControllerDelegate {
   @_Concurrency.MainActor @preconcurrency @objc override final public var supportedInterfaceOrientations: UIKit.UIInterfaceOrientationMask {
@@ -75,8 +80,123 @@ public struct PriceDetailModel : Swift.Codable {
   @_Concurrency.MainActor @preconcurrency @objc override final public func viewSafeAreaInsetsDidChange()
   @objc deinit
 }
-@_hasMissingDesignatedInitializers public class ACNetworkManager {
+public enum ACCrashReporterSDK {
+  public static func startAndConsumePendingSDKCrashJSON() -> Swift.String
+  public static func consumePendingSDKCrashJSON(deleteAllSignalLogs: Swift.Bool) -> Swift.String
+}
+extension ObjectiveC.NSObject {
+  @objc dynamic public var logDescription: Swift.String {
+    @objc get
+  }
+}
+extension Foundation.Data {
+  public var logDescription: Swift.String {
+    get
+  }
+}
+extension ACPaymentLinks.ACRequestError {
+  public var logDescription: Swift.String {
+    get
+  }
+}
+extension Foundation.URLRequest {
+  public var logDescription: Swift.String {
+    get
+  }
+}
+@objc @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objcMembers final public class LoggerManager : ObjectiveC.NSObject {
+  @objc public static let shared: ACPaymentLinks.LoggerManager
+  @objc final public func getGlobalTraceId() -> Swift.String
+  @objc public static func getTraceIdBridge() -> Swift.String
   @objc deinit
+}
+@objc public enum LogLevel : Swift.Int {
+  case none = 0
+  case fatal = 1
+  case error = 2
+  case warning = 3
+  case info = 4
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init?(rawValue: Swift.Int)
+  #endif
+  public typealias RawValue = Swift.Int
+  public var rawValue: Swift.Int {
+    get
+  }
+}
+public enum LogEventKey {
+  case bootInitializingConfig
+  case bootInitializationFailBoot
+  case bootInitializationRequest
+  case bootInitializationResponseFail
+  case bootInitializationResponse
+  case bootInitializationSuccess
+  case bootInitializationFail
+  case pricePointsRetrieving
+  case pricePointsRequest
+  case pricePointsResponse
+  case pricePointsResponseFail
+  case pricePointsSuccess
+  case pricePointsFail
+  case checkoutOpen
+  case checkoutBrowserCapabilityFail
+  case checkoutParsedUrlInvalid
+  case checkoutAboutToOpen
+  case checkoutOpenFail
+  case checkoutParsedUrlNotValid
+  case checkoutPurchaseIdNotValid
+  case foregroundServiceStarted
+  case foregroundServiceEnded
+  case foregroundServicePermission
+  case foregroundServiceOSNotSupported
+  case deeplinkReceived
+  case deeplinkParsing
+  case deeplinkParsingError
+  case deeplinkParsed
+  case purchaseSuccess
+  case purchaseFailedViaDeeplink
+  case purchaseFailedViaError
+  case orderValidationStart
+  case orderValidationRequest
+  case orderValidationResponse
+  case orderValidationFailCustomerId
+  case orderValidationFailProjectId
+  case orderValidationFailCheckoutToken
+  case chargeSuccess
+  case chargeFail
+  case canceled
+  case pollingRetry
+  case validationTimeout
+  case orderValidationPurchaseSuccess
+  case orderValidationPurchaseFail
+  case orderValidationFail
+  case fatalCrash
+  case coralogix
+  case analytic
+  case none
+  public static func == (a: ACPaymentLinks.LogEventKey, b: ACPaymentLinks.LogEventKey) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+}
+@objc public protocol ACPaymentLinksDelegate : ObjectiveC.NSObjectProtocol {
+  @objc func onInitialized()
+  @objc func onInitializeFailed(error: ACPaymentLinks.ACErrorMessage)
+  @objc func onPricePointsSuccess(pricePoints: ACPaymentLinks.PricePoints)
+  @objc func onPricePointsFailed(errorMessage: ACPaymentLinks.ACErrorMessage)
+  @objc func onPurchaseSuccess(order: ACPaymentLinks.GameOrderResponse)
+  #if compiler(>=5.3) && $NonescapableTypes
+  @objc func onPurchaseFailed(error: ACPaymentLinks.ACErrorMessage, order: ACPaymentLinks.GameOrderResponse?)
+  #endif
+}
+@objc public class ACConfigModel : ObjectiveC.NSObject, Swift.Codable {
+  #if compiler(>=5.3) && $NonescapableTypes
+  @objc public init(checkoutPublicKey: Swift.String, environment: Swift.String, redirectUrl: Swift.String? = nil)
+  #endif
+  @objc deinit
+  public func encode(to encoder: any Swift.Encoder) throws
+  required public init(from decoder: any Swift.Decoder) throws
 }
 @_hasMissingDesignatedInitializers @objcMembers @objc public class ACErrorMessage : ObjectiveC.NSObject, Swift.Codable {
   @objc final public let code: Swift.Int
@@ -89,11 +209,33 @@ public struct PriceDetailModel : Swift.Codable {
 @objc extension ACPaymentLinks.ACErrorMessage {
   @objc dynamic public func toJsonString() -> Swift.String
 }
-@objcMembers @objc public class CancelOrderResponse : ObjectiveC.NSObject, Swift.Codable {
-  @objc public var isOrderCancelled: Swift.Bool
-  @objc deinit
+@objc public enum BrowserMode : Swift.Int {
+  case external = 0
+  case sfsvc = 1
+  public var stringValue: Swift.String {
+    get
+  }
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init?(rawValue: Swift.Int)
+  #endif
+  public typealias RawValue = Swift.Int
+  public var rawValue: Swift.Int {
+    get
+  }
+}
+public struct CustomerModel : Swift.Codable {
+  public init(id: Swift.String, email: Swift.String)
   public func encode(to encoder: any Swift.Encoder) throws
-  required public init(from decoder: any Swift.Decoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct ItemModel : Swift.Encodable {
+  public init(name: Swift.String, assetUrl: Swift.String, sku: Swift.String, quantity: Swift.Int, quantityDisplay: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+}
+public struct OfferModel : Swift.Codable {
+  public init(name: Swift.String, sku: Swift.String, assetUrl: Swift.String, description: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
 }
 public struct OrderEventResponse : Swift.Codable {
   public let event: Swift.String
@@ -117,7 +259,9 @@ public struct OrderEventResponse : Swift.Codable {
   @objc final public let paymentMethodName: Swift.String?
   @objc final public let orderId: Swift.String?
   @objc final public let purchaseId: Swift.String?
+  #if compiler(>=5.3) && $NonescapableTypes
   public init(date: Swift.Int?, sessionToken: Swift.String?, offerName: Swift.String?, offerSku: Swift.String?, items: [ACPaymentLinks.Product]?, price: Swift.Int?, currency: Swift.String?, customerId: Swift.String?, customerCountry: Swift.String?, paymentMethodName: Swift.String?, orderId: Swift.String?, purchaseId: Swift.String?)
+  #endif
   @objc deinit
   public func encode(to encoder: any Swift.Encoder) throws
   required public init(from decoder: any Swift.Decoder) throws
@@ -125,7 +269,7 @@ public struct OrderEventResponse : Swift.Codable {
 @objc public class OrderResponseModel : ObjectiveC.NSObject, Swift.Codable {
   final public let status: Swift.String?
   final public let date: Swift.Int
-  final public let sessionId: Swift.String
+  final public let sessionId: Swift.String?
   final public let bundleName: Swift.String
   final public let bundleId: Swift.String
   final public let bundleSKU: Swift.String
@@ -140,13 +284,16 @@ public struct OrderEventResponse : Swift.Codable {
   final public let isNewPaymentMethodSaved: Swift.Bool?
   final public let products: [ACPaymentLinks.Product]?
   final public let state: ACPaymentLinks.OrderResponseModel.State?
+  public var isFromDeepLink: Swift.Bool?
   public enum State : Swift.String, Swift.Codable, Swift.CaseIterable {
     case chargePending
     case chargeSucceed
     case created
     case chargeFailed
     case paymentPending
+    #if compiler(>=5.3) && $NonescapableTypes
     public init?(rawValue: Swift.String)
+    #endif
     public typealias AllCases = [ACPaymentLinks.OrderResponseModel.State]
     public typealias RawValue = Swift.String
     nonisolated public static var allCases: [ACPaymentLinks.OrderResponseModel.State] {
@@ -156,7 +303,9 @@ public struct OrderEventResponse : Swift.Codable {
       get
     }
   }
-  public init(status: Swift.String?, date: Swift.Int, sessionId: Swift.String, bundleName: Swift.String, bundleId: Swift.String, bundleSKU: Swift.String, totalSum: Swift.Double, totalSumCurrency: Swift.String, userId: Swift.String, userCountry: Swift.String, paymentMethodName: Swift.String, orderId: Swift.String, purchaseId: Swift.String?, isSavedPaymentMethodUsed: Swift.Bool?, isNewPaymentMethodSaved: Swift.Bool?, products: [ACPaymentLinks.Product]?, state: ACPaymentLinks.OrderResponseModel.State?)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init(status: Swift.String?, date: Swift.Int, sessionId: Swift.String?, bundleName: Swift.String, bundleId: Swift.String, bundleSKU: Swift.String, totalSum: Swift.Double, totalSumCurrency: Swift.String, userId: Swift.String, userCountry: Swift.String, paymentMethodName: Swift.String, orderId: Swift.String, purchaseId: Swift.String?, isSavedPaymentMethodUsed: Swift.Bool?, isNewPaymentMethodSaved: Swift.Bool?, products: [ACPaymentLinks.Product]?, state: ACPaymentLinks.OrderResponseModel.State?)
+  #endif
   @objc deinit
   public func encode(to encoder: any Swift.Encoder) throws
   required public init(from decoder: any Swift.Decoder) throws
@@ -170,114 +319,12 @@ public struct OrderEventResponse : Swift.Codable {
   public func encode(to encoder: any Swift.Encoder) throws
   required public init(from decoder: any Swift.Decoder) throws
 }
-@objc public protocol ACPaymentLinksDelegate : ObjectiveC.NSObjectProtocol {
-  @objc func onInitialized()
-  @objc func onInitializeFailed(error: ACPaymentLinks.ACErrorMessage)
-  @objc func onPricePointsSuccess(pricePoints: ACPaymentLinks.PricePoints)
-  @objc func onPricePointsFailed(errorMessage: ACPaymentLinks.ACErrorMessage)
-  @objc func onPurchaseSuccess(order: ACPaymentLinks.GameOrderResponse)
-  @objc func onPurchaseFailed(error: ACPaymentLinks.ACErrorMessage)
-}
-public enum ACCheckoutErrorCode : Swift.Int, Swift.Error {
-  case httpRequest
-  case httpBootRequest
-  case httpSessionRequest
-  case httpProductsRequest
-  case httpConsumeRequest
-  case httpPricePointsRequest
-  case bootInitialization
-  case pricePointsFailed
-  case purchaseCanceled
-  case purchaseAlreadyCanceled
-  case purchaseClosedAndCanceled
-  case purchaseFailed
-  case purchaseTimeout
-  case browserDisabledOrNotAvailable
-  case browserConnectionLost
-  case browserCouldNotBeOpened
-  case doNothing
-  case invalidArgumentPurchaseIdError
-  case invalidArgumentCheckoutUrlError
-  case runtimeError
-  case unknownError
-  public var message: Swift.String {
-    get
-  }
-  public func errorMessage(data: Swift.String? = nil) -> ACPaymentLinks.ACErrorMessage
-  public static func fromCode(_ errorCode: ACPaymentLinks.ACCheckoutErrorCode, data: Swift.String? = nil) -> ACPaymentLinks.ACErrorMessage
-  public init?(rawValue: Swift.Int)
-  public typealias RawValue = Swift.Int
-  public var rawValue: Swift.Int {
-    get
-  }
-}
-public enum PortraitOrientationBridgeLock {
-  @discardableResult
-  public static func installIfNeeded() -> Swift.Bool
-  public static func begin(animated: Swift.Bool = false)
-  public static func end(animated: Swift.Bool = true, completion: (() -> Swift.Void)? = nil)
-}
-@objc public class ACConfigModel : ObjectiveC.NSObject, Swift.Codable {
-  @objc public init(checkoutPublicKey: Swift.String, environment: Swift.String, redirectUrl: Swift.String? = nil)
-  @objc deinit
-  public func encode(to encoder: any Swift.Encoder) throws
-  required public init(from decoder: any Swift.Decoder) throws
-}
-public class ACNetworkService<Request, Response> where Request : ACPaymentLinks.ACBaseNetworkRequest, Response : Swift.Decodable, Response : Swift.Encodable {
-  public init(request: Request)
-  public func send(completion: @escaping (Swift.Result<Response, ACPaymentLinks.ACRequestError>) -> Swift.Void)
-  @objc deinit
-}
-public struct CustomerModel : Swift.Codable {
-  public init(id: Swift.String, email: Swift.String)
+public struct PriceDetailModel : Swift.Codable {
+  public let price: Swift.Int
+  public let currency: Swift.String
+  public init(price: Swift.Int, currency: Swift.String)
   public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
-}
-public struct OfferModel : Swift.Codable {
-  public init(name: Swift.String, sku: Swift.String, assetUrl: Swift.String, description: Swift.String)
-  public func encode(to encoder: any Swift.Encoder) throws
-  public init(from decoder: any Swift.Decoder) throws
-}
-public enum ACHttpMethod : Swift.String {
-  case GET
-  case POST
-  case PUT
-  case PATCH
-  case DELETE
-  public init?(rawValue: Swift.String)
-  public typealias RawValue = Swift.String
-  public var rawValue: Swift.String {
-    get
-  }
-}
-public typealias Parameters = [Swift.String : Swift.String]
-public protocol ACBaseNetworkRequest {
-  var httpMethod: ACPaymentLinks.ACHttpMethod { get }
-  func urlHost() -> Swift.String?
-  func httpBody() -> Foundation.Data?
-  func headers() -> [Swift.String : Swift.String]?
-  func queriesParameters() -> [Swift.String : Swift.String]?
-  var keyDecodingStrategy: Foundation.JSONDecoder.KeyDecodingStrategy { get }
-}
-extension ACPaymentLinks.ACBaseNetworkRequest {
-  public var keyDecodingStrategy: Foundation.JSONDecoder.KeyDecodingStrategy {
-    get
-  }
-}
-@objc public enum BrowserMode : Swift.Int {
-  case external = 0
-  case sfsvc = 1
-  public var stringValue: Swift.String {
-    get
-  }
-  public init?(rawValue: Swift.Int)
-  public typealias RawValue = Swift.Int
-  public var rawValue: Swift.Int {
-    get
-  }
-}
-public enum NetworkError : Swift.Error {
-  case generic(ACPaymentLinks.ACRequestError)
 }
 @objc extension ACPaymentLinks.PricePoints {
   @objc dynamic public func toJsonString() -> Swift.String
@@ -309,15 +356,64 @@ public enum NetworkError : Swift.Error {
   public func encode(to encoder: any Swift.Encoder) throws
   required public init(from decoder: any Swift.Decoder) throws
 }
-@_hasMissingDesignatedInitializers final public class InmOrientationBridge {
-  @discardableResult
-  public static func installIfNeeded() -> Swift.Bool
-  public static func beginForcePortrait(animated: Swift.Bool = false)
-  public static func endForcePortrait(andThen completion: @escaping () -> Swift.Void)
-  @objc deinit
-}
 extension Foundation.CharacterSet {
   public static let acURLQueryAllowed: Foundation.CharacterSet
+}
+@_hasMissingDesignatedInitializers public class ACNetworkManager {
+  @objc deinit
+}
+@objcMembers @objc public class CancelOrderResponse : ObjectiveC.NSObject, Swift.Codable {
+  @objc public var isOrderCancelled: Swift.Bool
+  @objc deinit
+  public func encode(to encoder: any Swift.Encoder) throws
+  required public init(from decoder: any Swift.Decoder) throws
+}
+public enum ACHttpMethod : Swift.String {
+  case GET
+  case POST
+  case PUT
+  case PATCH
+  case DELETE
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init?(rawValue: Swift.String)
+  #endif
+  public typealias RawValue = Swift.String
+  public var rawValue: Swift.String {
+    get
+  }
+}
+public typealias Parameters = [Swift.String : Swift.String]
+public protocol ACBaseNetworkRequest {
+  var httpMethod: ACPaymentLinks.ACHttpMethod { get }
+  #if compiler(>=5.3) && $NonescapableTypes
+  func urlHost() -> Swift.String?
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  func httpBody() -> Foundation.Data?
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  func headers() -> [Swift.String : Swift.String]?
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  func queriesParameters() -> [Swift.String : Swift.String]?
+  #endif
+  var logEventKeyRequest: ACPaymentLinks.LogEventKey { get set }
+  var logEventKeyResponse: ACPaymentLinks.LogEventKey { get set }
+  var logEventKeyResponseFail: ACPaymentLinks.LogEventKey { get set }
+  var isUsePathMonitor: Swift.Bool { get set }
+  var keyDecodingStrategy: Foundation.JSONDecoder.KeyDecodingStrategy { get }
+}
+extension ACPaymentLinks.ACBaseNetworkRequest {
+  public var keyDecodingStrategy: Foundation.JSONDecoder.KeyDecodingStrategy {
+    get
+  }
+}
+public class ACNetworkService<Request, Response> where Request : ACPaymentLinks.ACBaseNetworkRequest, Response : Swift.Decodable, Response : Swift.Encodable {
+  public init(request: Request)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func send(completion: @escaping (Swift.Result<Response, ACPaymentLinks.ACRequestError>) -> Swift.Void)
+  #endif
+  @objc deinit
 }
 public enum ACRequestErrorCode : Swift.Error, Swift.Equatable {
   case noInternet
@@ -338,18 +434,70 @@ public class ACRequestError : Swift.Error {
   final public let errorCode: ACPaymentLinks.ACRequestErrorCode
   final public let errorMessage: Swift.String?
   public var rawResponse: Foundation.Data?
+  #if compiler(>=5.3) && $NonescapableTypes
   public init(errorCode: ACPaymentLinks.ACRequestErrorCode, errorMessage: Swift.String? = nil)
+  #endif
   @objc deinit
 }
-extension ACPaymentLinks.OrderResponseModel.State : Swift.Equatable {}
-extension ACPaymentLinks.OrderResponseModel.State : Swift.Hashable {}
-extension ACPaymentLinks.OrderResponseModel.State : Swift.RawRepresentable {}
-extension ACPaymentLinks.ACCheckoutErrorCode : Swift.Equatable {}
-extension ACPaymentLinks.ACCheckoutErrorCode : Swift.Hashable {}
-extension ACPaymentLinks.ACCheckoutErrorCode : Swift.RawRepresentable {}
-extension ACPaymentLinks.ACHttpMethod : Swift.Equatable {}
-extension ACPaymentLinks.ACHttpMethod : Swift.Hashable {}
-extension ACPaymentLinks.ACHttpMethod : Swift.RawRepresentable {}
+public enum NetworkError : Swift.Error {
+  case generic(ACPaymentLinks.ACRequestError)
+}
+public enum ACCheckoutErrorCode : Swift.Int, Swift.Error {
+  case serverError
+  case generalServerError
+  case pricePointsParsingError
+  case tokenValidationError
+  case bootInitialization
+  case bootEnviroment
+  case bootToken
+  case bootCustomerId
+  case bootRedirectUrlConfig
+  case purchaseCanceled
+  case purchaseClosedAndCanceled
+  case purchaseFailed
+  case purchaseTimeout
+  case purchaseNotFound
+  case validateOrderEnvFailed
+  case customerValidationFailed
+  case purchaseParsingError
+  case browserDisabledOrNotAvailable
+  case browserCouldNotBeOpened
+  case doNothing
+  case invalidArgumentPurchaseId
+  case invalidArgumentCheckoutUrl
+  case noInternetConnection
+  case unknownError
+  public var message: Swift.String {
+    get
+  }
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func errorMessage(data: Swift.String? = nil) -> ACPaymentLinks.ACErrorMessage
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  public static func fromCode(_ errorCode: ACPaymentLinks.ACCheckoutErrorCode, data: Swift.String? = nil) -> ACPaymentLinks.ACErrorMessage
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init?(rawValue: Swift.Int)
+  #endif
+  public typealias RawValue = Swift.Int
+  public var rawValue: Swift.Int {
+    get
+  }
+}
+extension ACPaymentLinks.LogLevel : Swift.Equatable {}
+extension ACPaymentLinks.LogLevel : Swift.Hashable {}
+extension ACPaymentLinks.LogLevel : Swift.RawRepresentable {}
+extension ACPaymentLinks.LogEventKey : Swift.Equatable {}
+extension ACPaymentLinks.LogEventKey : Swift.Hashable {}
 extension ACPaymentLinks.BrowserMode : Swift.Equatable {}
 extension ACPaymentLinks.BrowserMode : Swift.Hashable {}
 extension ACPaymentLinks.BrowserMode : Swift.RawRepresentable {}
+extension ACPaymentLinks.OrderResponseModel.State : Swift.Equatable {}
+extension ACPaymentLinks.OrderResponseModel.State : Swift.Hashable {}
+extension ACPaymentLinks.OrderResponseModel.State : Swift.RawRepresentable {}
+extension ACPaymentLinks.ACHttpMethod : Swift.Equatable {}
+extension ACPaymentLinks.ACHttpMethod : Swift.Hashable {}
+extension ACPaymentLinks.ACHttpMethod : Swift.RawRepresentable {}
+extension ACPaymentLinks.ACCheckoutErrorCode : Swift.Equatable {}
+extension ACPaymentLinks.ACCheckoutErrorCode : Swift.Hashable {}
+extension ACPaymentLinks.ACCheckoutErrorCode : Swift.RawRepresentable {}

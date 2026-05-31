@@ -15,3 +15,4 @@ FOUNDATION_EXPORT const unsigned char ACPaymentLinksVersionString[];
 
 #import <ACPaymentLinks/ACBridgeAPI_Bridge.h>
 #import <SafariServices/SafariServices.h>
+#import <ACPaymentLinks/ACCrashReporter.h>
