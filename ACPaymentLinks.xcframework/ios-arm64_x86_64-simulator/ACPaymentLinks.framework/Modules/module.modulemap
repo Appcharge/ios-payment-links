@@ -7,5 +7,4 @@ framework module ACPaymentLinks {
 
 module ACPaymentLinks.Swift {
   header "ACPaymentLinks-Swift.h"
-  requires objc
 }
