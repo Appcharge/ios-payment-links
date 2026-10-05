@@ -1,6 +1,0 @@
-.swiftpm/
-ACPaymentLinks.xcframework.zip
-build.sh
-override.sh
-slack_notify.sh
-check_xcframework.sh
