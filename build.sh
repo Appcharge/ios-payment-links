@@ -52,7 +52,7 @@ fi
 ##############################################
 # STEP 1 — Config (Repo is EMPTY and SPM-only)
 ##############################################
-REPO_HTTPS="https://github.com/Appcharge/ios-payment-links.git"
+REPO_HTTPS="git@github.com:Appcharge/ios-payment-links.git"
 REPO_NAME="Appcharge/ios-payment-links"
 DEFAULT_BRANCH="master"
 
@@ -191,6 +191,26 @@ if [[ -n "${PODSPEC}" && -f "${PODSPEC}" ]]; then
 fi
 
 echo "✔ Allowed files staged"
+
+##############################################
+# STEP 7.5 — Ensure internal scripts are NOT in the repo
+# - Removes them from git index if tracked (keeps local files).
+# - Skips silently if already clean.
+##############################################
+echo "🧹 [STEP 7.5] Checking internal scripts are excluded from repo..."
+
+EXCLUDED_FILES=("build.sh" "override.sh" "slack_notify.sh" "check_xcframework.sh" "$ZIP_NAME")
+
+for f in "${EXCLUDED_FILES[@]}"; do
+  if git ls-files --cached --error-unmatch "$f" >/dev/null 2>&1; then
+    echo "   ❌ Removing from repo (kept locally): $f"
+    git rm --cached "$f" >/dev/null
+  else
+    echo "   ✔ Not in repo, skipping: $f"
+  fi
+done
+
+echo "✔ Excluded files verified"
 
 ##############################################
 # STEP 8 — Commit (create initial commit if repo is empty)
